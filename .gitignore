@@ -219,4 +219,4 @@ __marimo__/
 *code-workspace
 
 #Don't accidentially commit datasets
-data/*csv
+src/molshap/ressources/*csv
