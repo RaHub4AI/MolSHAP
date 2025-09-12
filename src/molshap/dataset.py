@@ -3,6 +3,7 @@ import pathlib
 import pandas as pd
 from rdkit.Chem import PandasTools
 from rdkit import RDLogger
+import numpy as np
 
 
 this_script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,7 +17,24 @@ def get_slc6a4_df():
         urllib.request.urlretrieve(url, csv_file)
 
     df = pd.read_csv(csv_file)
-    return df
+
+    df.rename(columns={"pXC50":"target"}, inplace=True)
+
+    np.random.seed(0xFACE)
+    df["subset"] = "Train"
+    val_mask = np.random.random(len(df)) < 0.25
+    df.loc[val_mask, "subset"] = "Validation"
+    blind_mask = np.random.random(len(df)) < 0.05
+    df.loc[blind_mask, "subset"] = "Blind"
+    #Remove invalids
+    RDLogger.DisableLog("rdApp.*")
+    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="SMILES")
+    RDLogger.EnableLog("rdApp.*")
+    df = df[~df.ROMol.isna()]
+
+    df.reset_index(inplace=True)
+
+    return df[["SMILES","target","subset","ROMol"]]
 
 
 def get_logp_df():
@@ -29,15 +47,19 @@ def get_logp_df():
     df = pd.read_csv(csv_file)
     #column Standardization and check of SMILES validity
     df.rename(columns={"logP": "target", "Subset":"subset"}, inplace=True)
-    df = df[["SMILES","target", "subset"]]
     RDLogger.DisableLog("rdApp.*")
     PandasTools.AddMoleculeColumnToFrame(df, smilesCol="SMILES")
     RDLogger.EnableLog("rdApp.*")
     df = df[~df.ROMol.isna()]
     df.reset_index(inplace=True)
-    return df
+    return df[["SMILES","target","subset","ROMol"]]
 
 
 if __name__ == "__main__":
-    #print(get_slc6a4_df().head())
-    print(get_logp_df().head())
+    #print("SLC6A4 dataset")
+    #df = get_slc6a4_df()
+    print("LogP dataset")
+    df = get_logp_df()
+    print(df.columns)
+    print(len(df))
+    #print(get_logp_df().head())
