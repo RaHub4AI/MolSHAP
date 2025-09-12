@@ -34,7 +34,7 @@ def get_logp_df():
     PandasTools.AddMoleculeColumnToFrame(df, smilesCol="SMILES")
     RDLogger.EnableLog("rdApp.*")
     df = df[~df.ROMol.isna()]
-
+    df.reset_index(inplace=True)
     return df
 
 
