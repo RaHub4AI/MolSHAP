@@ -1,6 +1,9 @@
 import os
 import pathlib
 import pandas as pd
+from rdkit.Chem import PandasTools
+from rdkit import RDLogger
+
 
 this_script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,6 +27,14 @@ def get_logp_df():
         urllib.request.urlretrieve(url, csv_file)
 
     df = pd.read_csv(csv_file)
+    #column Standardization and check of SMILES validity
+    df.rename(columns={"logP": "target", "Subset":"subset"}, inplace=True)
+    df = df[["SMILES","target", "subset"]]
+    RDLogger.DisableLog("rdApp.*")
+    PandasTools.AddMoleculeColumnToFrame(df, smilesCol="SMILES")
+    RDLogger.EnableLog("rdApp.*")
+    df = df[~df.ROMol.isna()]
+
     return df
 
 
