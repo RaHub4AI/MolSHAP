@@ -1,4 +1,4 @@
-"""SMARTS pattern for MACCs Keys.
+"""SMARTS pattern for MACCS Keys.
 
 Patterns are taken from the RDKit implementation. [1]
 
