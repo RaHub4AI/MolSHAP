@@ -1,4 +1,4 @@
-"""Test if SMARTs are valid."""
+"""Test if SMARTS patterns are valid."""
 
 import unittest
 
